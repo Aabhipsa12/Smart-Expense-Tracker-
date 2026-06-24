@@ -15,14 +15,16 @@ const express = require("express");
 
 const mongoose = require("mongoose");
 
+const Expense = require("./models/Expense");
+
 const app = express();
 
 mongoose.connect(
-    "mongodb+srv://expenseadmin:ExpenseTracker321@cluster0.304svgo.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+  "mongodb+srv://expenseadmin:ExpenseTracker321@cluster0.304svgo.mongodb.net/expenseTrackerDB?retryWrites=true&w=majority&appName=Cluster0"
 )
 .then(() => {
     console.log("MongoDB Connected");
-})
+    })
 .catch((err) => {
     console.log(err);
 });
@@ -32,37 +34,52 @@ const PORT = 5000;
 // Allows server to read JSON data
 app.use(express.json());
 
-// Temporary expense storage
-let expenses = [
-    {
-        id: 1,
-        title: "Pizza",
-        amount: 250,
-        category: "Food"
-    }
-];
 
 // GET all expenses
-app.get("/expenses", (req, res) => {
-    res.json(expenses);
+app.get("/expenses", async (req, res) => {
+
+    try {
+
+        const expenses = await Expense.find();
+
+        res.json(expenses);
+
+    } catch (error) {
+
+        res.status(500).json({
+            message: error.message
+        });
+
+    }
+
 });
 
 // POST expense
-app.post("/expenses", (req, res) => {
+app.post("/expenses", async (req, res) => {
 
-    const newExpense = {
-        id: expenses.length + 1,
-        title: req.body.title,
-        amount: req.body.amount,
-        category: req.body.category
-    };
+    try {
 
-    expenses.push(newExpense);
+        const newExpense = new Expense({
+            title: req.body.title,
+            amount: req.body.amount,
+            category: req.body.category
+        });
 
-    res.status(201).json({
-        message: "Expense added successfully",
-        expense: newExpense
-    });
+        const savedExpense = await newExpense.save();
+
+        res.status(201).json({
+            message: "Expense saved to MongoDB",
+            expense: savedExpense
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            message: error.message
+        });
+
+    }
+
 });
 
 // DELETE expense
