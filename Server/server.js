@@ -19,7 +19,7 @@ const Expense = require("./models/Expense");
 
 const app = express();
 
-console.log("NEW SERVER FILE RUNNING");
+
 
 mongoose.connect(
   "mongodb+srv://expenseadmin:ExpenseTracker321@cluster0.304svgo.mongodb.net/expenseTrackerDB?retryWrites=true&w=majority&appName=Cluster0"
@@ -84,13 +84,19 @@ app.post("/expenses", async (req, res) => {
 
 });
 
+
+
 // DELETE expense
 app.delete("/expenses/:id", async (req, res) => {
+
+    
+   
 
     try {
 
         const deletedExpense =
             await Expense.findByIdAndDelete(req.params.id);
+
 
         if (!deletedExpense) {
             return res.status(404).json({
@@ -103,6 +109,8 @@ app.delete("/expenses/:id", async (req, res) => {
         });
 
     } catch (error) {
+
+        console.log(error);
 
         res.status(500).json({
             message: error.message
